@@ -1,0 +1,16 @@
+.array-container {
+    position: absolute;
+    /* left: 100px; */
+    margin-top: 20%;
+}
+
+.array-bar {
+    width: 4px;
+    background-color: aqua;
+    display: inline-block;
+    margin: 0 1px;
+}
+
+.button-group>button {
+    margin: 5px;
+}
