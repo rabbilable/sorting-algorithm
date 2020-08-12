@@ -5,7 +5,7 @@ import * as sortingAlgorithms from "../sortingAlgorithms/sortingAlgortithm";
 
 const ANIMATION_SPEED_MS = 1;
 
-const NUMBER_OF_ARRAY_BARS = 310;
+const NUMBER_OF_ARRAY_BARS = 150;
 
 const PRIMARY_COLOR = "turquoise";
 
@@ -35,17 +35,30 @@ export class SortingVisualizer extends Component {
 		const animations = sortingAlgorithms.getMergeSortAnimations(
 			this.state.array
 		);
+		console.log(animations);
 		for (let i = 0; i < animations.length; i++) {
-			const arrayBars = document.getElementByClassName("array-bar");
+			const arrayBars = document.getElementsByClassName("array-bar");
+			// console.log(arrayBars);
 			const isColorChange = i % 3 !== 2;
 			if (isColorChange) {
 				const [barOneIdx, barTwoIdx] = animations[i];
 				const barOneStyle = arrayBars[barOneIdx].style;
 				const barTwoStyle = arrayBars[barTwoIdx].style;
-				const 
+				const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
+				setTimeout(() => {
+					barOneStyle.backgroundColor = color;
+					barTwoStyle.backgroundColor = color;
+				}, i * ANIMATION_SPEED_MS);
+			} else {
+				setTimeout(() => {
+					const [barOneIdx, newHeight] = animations[i];
+					const barOneStyle = arrayBars[barOneIdx].style;
+					barOneStyle.height = `${newHeight}px`;
+				}, i * ANIMATION_SPEED_MS);
 			}
 		}
 	}
+
 	quickSort() {}
 	heapSort() {}
 	bubbleSort() {}
@@ -53,12 +66,14 @@ export class SortingVisualizer extends Component {
 	testSortingAlgorithms() {
 		for (let i = 0; i < 100; i++) {
 			const array = [];
-			const length = randomIntFromInterval(1, 1000);
+			const length = randomIntFromInterval(1, 730);
 			for (let i = 0; i < length; i++) {
 				array.push(randomIntFromInterval(-1000, 1000));
 			}
 			const javaScriptSortedArray = array.slice().sort((a, b) => a - b);
-			const mergeSortedArray = sortingAlgorithms.mergeSort(array.slice());
+			const mergeSortedArray = sortingAlgorithms.getMergeSortAnimations(
+				array.slice()
+			);
 			console.log(arraysAreEqual(javaScriptSortedArray, mergeSortedArray));
 		}
 	}
