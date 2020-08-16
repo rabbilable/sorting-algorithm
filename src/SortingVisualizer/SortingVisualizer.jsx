@@ -6,7 +6,7 @@ import { getMergeSortAnimations } from "../algorithms/mergeSort";
 const ARR_LEN = 100;
 const MIN_NUM = 5;
 const MAX_NUM = 80;
-const DELAY = 5
+const DELAY = 5;
 const ACCESSED_COLOUR = "turquoise";
 const SORTED_COLOUR = "green";
 
@@ -15,8 +15,13 @@ export class SortingVisualizer extends Component {
 		super(props);
 
 		this.state = {
-			array: [],
-			
+			arr: [],
+			setArr: [],
+			isSorting: false,
+			setIsSorting: false,
+			isSorted: false,
+			setIsSorted: false,
+			containerRef: null,
 		};
 	}
 
@@ -25,47 +30,70 @@ export class SortingVisualizer extends Component {
 	}
 
 	resetArray() {
-		const array = [];
-		for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
-			array.push(randomIntFromInterval(5, 730));
+		if (this.state.isSorting) return;
+		if (this.state.isSorted) this.resetArrayColor();
+		this.setState({ setIsSorted: false });
+		const arr = [];
+		for (let i = 0; i < ARR_LEN; i++) {
+			arr.push((MAX_NUM - MIN_NUM) * (i / ARR_LEN) + MIN_NUM);
 		}
-		this.setState({ array });
+		shuffle(arr);
+		this.setState({ arr: arr });
 	}
 
 	mergeSort() {
-		const animations = mergeSort.getMergeSortAnimations(this.state.array);
-		console.log(animations);
-		for (let i = 0; i < animations.length; i++) {
-			const arrayBars = document.getElementsByClassName("array-bar");
-			// console.log(arrayBars);
-			const isColorChange = i % 3 !== 2;
-			if (isColorChange) {
-				const [barOneIdx, barTwoIdx] = animations[i];
-				const barOneStyle = arrayBars[barOneIdx].style;
-				const barTwoStyle = arrayBars[barTwoIdx].style;
-				const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
-				setTimeout(() => {
-					barOneStyle.backgroundColor = color;
-					barTwoStyle.backgroundColor = color;
-				}, i * ANIMATION_SPEED_MS);
-			} else {
-				setTimeout(() => {
-					const [barOneIdx, newHeight] = animations[i];
-					const barOneStyle = arrayBars[barOneIdx].style;
-					barOneStyle.height = `${newHeight}px`;
-				}, i * ANIMATION_SPEED_MS);
-			}
-		}
+		const animations = getMergeSortAnimations(this.state.arr);
+		this.animateArrayUpdate(animations);
 	}
 
 	quickSort() {}
 	heapSort() {}
 	bubbleSort() {}
+
+	animateArrayUpdate(animations) {
+		if (this.state.isSorting) return;
+		this.setState({ setIsSorting: true });
+		animations.forEach(([comparison, swapped], index) => {
+			setTimeout(() => {
+				if (!swapped) {
+					if (comparison.length === 2) {
+						// console.log(comparison);
+						const [i, j] = comparison;
+						this.animateArrayAccess(i);
+						this.animateArrayAccess(j);
+					} else {
+						const [i] = comparison;
+						this.animateArrayAccess(i);
+					}
+				} else {
+					const [k, newValue] = comparison;
+					this.setState((state) => {
+						console.log("k:",k, "nv:",newValue);
+						const newArr = [...state.setArr];
+						// console.log(newArr);
+					});
+				}
+			}, index * DELAY);
+		});
+		setTimeout(() => {
+			this.animateSortedArray();
+		}, animations.length * DELAY);
+	}
+
+	animateArrayAccess() {
+		console.log("working");
+	}
+	animateSortedArray() {
+		console.log("dskjds");
+	}
+	resetArrayColor() {
+		console.log("dsjhsd");
+	}
 	render() {
-		const { array } = this.state;
+		const { arr } = this.state;
 		return (
 			<div className="container array-container">
-				{array.map((value, idx) => (
+				{arr.map((value, idx) => (
 					<div
 						className="array-bar"
 						key={idx}
@@ -117,16 +145,11 @@ export class SortingVisualizer extends Component {
 		);
 	}
 }
-function randomIntFromInterval(min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function arraysAreEqual(arrayOne, arrayTwo) {
-	console.log("unsorted", arrayOne);
-	console.log("sorted", arrayTwo);
-	if (arrayOne.length !== arrayTwo.length) return false;
-	for (let i = 0; i < arrayOne.length; i++) {
-		if (arrayOne[i] !== arrayTwo[i]) return false;
+const shuffle = (arr) => {
+	for (let i = arr.length - 1; i >= 0; i--) {
+		const randomIndex = Math.floor(Math.random() * (i + 1));
+		const temp = arr[i];
+		arr[i] = arr[randomIndex];
+		arr[randomIndex] = temp;
 	}
-	return true;
-}
+};
